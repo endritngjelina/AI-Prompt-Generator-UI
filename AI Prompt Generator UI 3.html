@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prompt Generator Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0066ff;
+            --primary-dark: #0052cc;
+            --secondary: #6366f1;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-lg: rgba(0, 0, 0, 0.15);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border: #334155;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-lg: rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            min-height: 100vh;
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+            box-shadow: 2px 0 12px var(--shadow);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border);
+            padding: 24px 32px;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-left: auto;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 102, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+            padding: 24px 32px;
+            overflow: hidden;
+        }
+
+        .prompt-builder {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 4px 16px var(--shadow);
+            overflow-y: auto;
+        }
+
+        .preview-panel {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 4px 16px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .template-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px var(--shadow-lg);
+        }
+
+        .template-card.active {
+            border-color: var(--primary);
+            background: rgba(0, 102, 255, 0.05);
+        }
+
+        .template-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .template-card.active::before {
+            opacity: 1;
+        }
+
+        .template-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .template-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .variable-input {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+        }
+
+        .variable-tag {
+            background: linear-gradient(135deg, var(--accent) 0%, #f97316 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .preview-output {
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            min-height: 200px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .preview-placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 24px;
+            padding: 16px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .floating-toolbar {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 16px var(--shadow-lg);
+        }
+
+        .fab-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) translateY(-2px);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px var(--shadow-lg);
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: var(--success);
+            color: white;
+            padding: 16px 24px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 8px 24px var(--shadow-lg);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+        }
+
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+            
+            .preview-panel {
+                order: -1;
+            }
+        }
+
+        .highlight {
+            background: rgba(0, 102, 255, 0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="section-title">🎯 Quick Templates</div>
+            <div class="template-grid">
+                <div class="template-card active" data-template="creative">
+                    <div class="template-title">Creative Writing</div>
+                    <div class="template-description">Generate stories, articles, and creative content</div>
+                </div>
+                <div class="template-card" data-template="image">
+                    <div class="template-title">Image Generation</div>
+                    <div class="template-description">Create detailed prompts for Midjourney, DALL-E</div>
+                </div>
+                <div class="template-card" data-template="code">
+                    <div class="template-title">Code Assistant</div>
+                    <div class="template-description">Programming help and code generation</div>
+                </div>
+                <div class="template-card" data-template="analysis">
+                    <div class="template-title">Data Analysis</div>
+                    <div class="template-description">Analyze data and generate insights</div>
+                </div>
+            </div>
+
+            <div class="section-title">📊 Prompt Library</div>
+            <div class="form-group">
+                <button class="btn btn-secondary" onclick="savePrompt()">💾 Save Current</button>
+                <button class="btn btn-secondary" onclick="loadPrompts()">📁 Load Saved</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="logo">
+                    <div class="logo-icon">AI</div>
+                    <span>Prompt Generator Pro</span>
+                </div>
+                <div class="header-controls">
+                    <button class="btn btn-secondary" onclick="exportPrompt()">📤 Export</button>
+                    <button class="btn btn-secondary" onclick="importPrompt()">📥 Import</button>
+                    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+                </div>
+            </header>
+
+            <div class="workspace">
+                <section class="prompt-builder">
+                    <div class="section-title">🛠️ Prompt Builder</div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">AI Model Target</label>
+                        <select class="form-select" id="modelTarget" onchange="updatePreview()">
+                            <option value="chatgpt">ChatGPT / GPT-4</option>
+                            <option value="claude">Claude</option>
+                            <option value="midjourney">Midjourney</option>
+                            <option value="dalle">DALL-E</option>
+                            <option value="stable-diffusion">Stable Diffusion</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Main Instruction</label>
+                        <textarea class="form-textarea" id="mainInstruction" placeholder="Enter your main prompt instruction..." onchange="updatePreview()"></textarea>
+                    </div>
+
+                    <div class="section-title">🔧 Variables & Parameters</div>
+                    <div id="variablesList"></div>
+                    <button class="btn btn-secondary" onclick="addVariable()">+ Add Variable</button>
+
+                    <div class="form-group">
+                        <label class="form-label">Context & Style</label>
+                        <textarea class="form-textarea" id="contextStyle" placeholder="Provide additional context, style requirements, or constraints..." onchange="updatePreview()"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Output Format</label>
+                        <select class="form-select" id="outputFormat" onchange="updatePreview()">
+                            <option value="">Default</option>
+                            <option value="json">JSON Structure</option>
+                            <option value="markdown">Markdown</option>
+                            <option value="table">Table Format</option>
+                            <option value="list">Bullet Points</option>
+                            <option value="code">Code Block</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="preview-panel">
+                    <div class="section-title">👁️ Live Preview</div>
+                    <div class="preview-output" id="previewOutput">
+                        <div class="preview-placeholder">Your prompt will appear here as you build it...</div>
+                    </div>
+                    
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <div class="stat-value" id="charCount">0</div>
+                            <div class="stat-label">Characters</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="wordCount">0</div>
+                            <div class="stat-label">Words</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="tokenCount">0</div>
+                            <div class="stat-label">Est. Tokens</div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="copyPrompt()">📋 Copy Prompt</button>
+                        <button class="btn btn-secondary" onclick="testPrompt()">🧪 Test</button>
+                        <button class="btn btn-secondary" onclick="optimizePrompt()">⚡ Optimize</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="floating-toolbar">
+        <button class="fab fab-primary" onclick="quickSave()" title="Quick Save">💾</button>
+    </div>
+
+    <div class="modal" id="testModal">
+        <div class="modal-content">
+            <div class="section-title">🧪 Prompt Tester</div>
+            <p>This would integrate with AI APIs to test your prompt. For demo purposes, we'll simulate a response.</p>
+            <div class="form-group">
+                <button class="btn btn-primary" onclick="runTest()">Run Test</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+            <div id="testResults"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let variables = [];
+        let currentTemplate = 'creative';
+        
+        const templates = {
+            creative: {
+                instruction: "Write a compelling {content_type} about {topic} in a {tone} tone. The piece should be {length} and targeted at {audience}.",
+                variables: [
+                    { name: 'content_type', value: 'blog post', description: 'Type of content to create' },
+                    { name: 'topic', value: 'artificial intelligence', description: 'Main subject matter' },
+                    { name: 'tone', value: 'professional yet engaging', description: 'Writing style and voice' },
+                    { name: 'length', value: '800-1000 words', description: 'Desired length' },
+                    { name: 'audience', value: 'tech professionals', description: 'Target audience' }
+                ]
+            },
+            image: {
+                instruction: "Create a {style} image of {subject} in {setting}. The composition should be {composition}, with {lighting} lighting. Color palette: {colors}. Quality: {quality}",
+                variables: [
+                    { name: 'style', value: 'photorealistic', description: 'Art style or technique' },
+                    { name: 'subject', value: 'a majestic dragon', description: 'Main subject of the image' },
+                    { name: 'setting', value: 'a misty mountain landscape', description: 'Background/environment' },
+                    { name: 'composition', value: 'centered with rule of thirds', description: 'Image composition' },
+                    { name: 'lighting', value: 'golden hour', description: 'Lighting conditions' },
+                    { name: 'colors', value: 'warm oranges and deep blues', description: 'Color scheme' },
+                    { name: 'quality', value: '8K, ultra detailed', description: 'Image quality specs' }
+                ]
+            },
+            code: {
+                instruction: "Write {language} code to {task}. The solution should be {approach} and include {features}. Code style: {style}",
+                variables: [
+                    { name: 'language', value: 'Python', description: 'Programming language' },
+                    { name: 'task', value: 'create a REST API', description: 'What the code should accomplish' },
+                    { name: 'approach', value: 'object-oriented and well-documented', description: 'Coding approach' },
+                    { name: 'features', value: 'error handling and unit tests', description: 'Required features' },
+                    { name: 'style', value: 'PEP 8 compliant', description: 'Code style guidelines' }
+                ]
+            },
+            analysis: {
+                instruction: "Analyze the {data_type} data to identify {analysis_goals}. Focus on {metrics} and provide insights about {insights}. Present findings in {format}.",
+                variables: [
+                    { name: 'data_type', value: 'sales', description: 'Type of data to analyze' },
+                    { name: 'analysis_goals', value: 'trends and patterns', description: 'Analysis objectives' },
+                    { name: 'metrics', value: 'revenue, growth rate, and customer segments', description: 'Key metrics to examine' },
+                    { name: 'insights', value: 'actionable business recommendations', description: 'Type of insights needed' },
+                    { name: 'format', value: 'executive summary with charts', description: 'Output format' }
+                ]
+            }
+        };
+
+        function initializeApp() {
+            loadTemplate(currentTemplate);
+            updatePreview();
+        }
+
+        function loadTemplate(templateName) {
+            currentTemplate = templateName;
+            const template = templates[templateName];
+            
+            document.getElementById('mainInstruction').value = template.instruction;
+            variables = [...template.variables];
+            
+            updateVariablesList();
+            updatePreview();
+            
+            // Update active template card
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('active');
+                if (card.dataset.template === templateName) {
+                    card.classList.add('active');
+                }
+            });
+        }
+
+        function addVariable() {
+            variables.push({
+                name: `variable_${variables.length + 1}`,
+                value: '',
+                description: 'New variable'
+            });
+            updateVariablesList();
+            updatePreview();
+        }
+
+        function removeVariable(index) {
+            variables.splice(index, 1);
+            updateVariablesList();
+            updatePreview();
+        }
+
+        function updateVariablesList() {
+            const container = document.getElementById('variablesList');
+            container.innerHTML = variables.map((variable, index) => `
+                <div class="variable-input">
+                    <div class="variable-tag">{${variable.name}}</div>
+                    <input type="text" placeholder="Variable name" value="${variable.name}" 
+                           onchange="updateVariable(${index}, 'name', this.value)" class="form-input" style="flex: 1;">
+                    <input type="text" placeholder="Value" value="${variable.value}" 
+                           onchange="updateVariable(${index}, 'value', this.value)" class="form-input" style="flex: 2;">
+                    <button onclick="removeVariable(${index})" class="btn btn-secondary">❌</button>
+                </div>
+            `).join('');
+        }
+
+        function updateVariable(index, field, value) {
+            variables[index][field] = value;
+            updateVariablesList();
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const mainInstruction = document.getElementById('mainInstruction').value;
+            const contextStyle = document.getElementById('contextStyle').value;
+            const outputFormat = document.getElementById('outputFormat').value;
+            const modelTarget = document.getElementById('modelTarget').value;
+            
+            let prompt = mainInstruction;
+            
+            // Replace variables
+            variables.forEach(variable => {
+                const placeholder = `{${variable.name}}`;
+                const replacement = variable.value || `<span class="highlight">${placeholder}</span>`;
+                prompt = prompt.replace(new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), replacement);
+            });
+            
+            // Add context and style
+            if (contextStyle) {
+                prompt += `\n\nAdditional Context:\n${contextStyle}`;
+            }
+            
+            // Add output format
+            if (outputFormat) {
+                const formatInstructions = {
+                    json: 'Please format your response as valid JSON.',
+                    markdown: 'Please format your response using Markdown syntax.',
+                    table: 'Please present your response in table format.',
+                    list: 'Please format your response as a bulleted list.',
+                    code: 'Please wrap your response in code blocks with appropriate syntax highlighting.'
+                };
+                prompt += `\n\nOutput Format: ${formatInstructions[outputFormat]}`;
+            }
+            
+            // Add model-specific optimizations
+            if (modelTarget === 'midjourney') {
+                prompt += ' --v 6 --style raw --ar 16:9';
+            }
+            
+            document.getElementById('previewOutput').innerHTML = prompt || '<div class="preview-placeholder">Your prompt will appear here as you build it...</div>';
+            
+            updateStats(prompt);
+        }
+
+        function updateStats(text) {
+            const charCount = text.length;
+            const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+            const tokenCount = Math.ceil(charCount / 4); // Rough estimate
+            
+            document.getElementById('charCount').textContent = charCount.toLocaleString();
+            document.getElementById('wordCount').textContent = wordCount.toLocaleString();
+            document.getElementById('tokenCount').textContent = tokenCount.toLocaleString();
+        }
+
+        function copyPrompt() {
+            const prompt = document.getElementById('previewOutput').textContent;
+            navigator.clipboard.writeText(prompt).then(() => {
+                showToast('Prompt copied to clipboard!');
+            });
+        }
+
+        function testPrompt() {
+            document.getElementById('testModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+
+        function runTest() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<div class="loading">Running test...</div>';
+            
+            setTimeout(() => {
+                results.innerHTML = `
+                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; margin-top: 16px;">
+                        <strong>Test Result:</strong><br>
+                        Your prompt structure looks good! The AI would likely understand and follow these instructions effectively.
+                        <br><br>
+                        <strong>Recommendations:</strong>
+                        <ul style="margin: 8px 0; padding-left: 20px;">
+                            <li>Consider adding more specific examples</li>
+                            <li>Token count is optimal for most models</li>
+                            <li>Clear variable structure detected</li>
+                        </ul>
+                    </div>
+                `;
+            }, 2000);
+        }
+
+        function optimizePrompt() {
+            const currentPrompt = document.getElementById('previewOutput').textContent;
+            showToast('Analyzing prompt for optimization opportunities...');
+            
+            // Simulate AI optimization
+            setTimeout(() => {
+                showToast('✨ Prompt optimized! Check the suggestions panel.');
+            }, 2000);
+        }
+
+        function savePrompt() {
+            const promptData = {
+                template: currentTemplate,
+                instruction: document.getElementById('mainInstruction').value,
+                variables: variables,
+                context: document.getElementById('contextStyle').value,
+                format: document.getElementById('outputFormat').value,
+                model: document.getElementById('modelTarget').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            const savedPrompts = JSON.parse(localStorage.getItem('savedPrompts') || '[]');
+            const promptName = prompt('Enter a name for this prompt:', `Prompt ${savedPrompts.length + 1}`);
+            
+            if (promptName) {
+                promptData.name = promptName;
+                savedPrompts.push(promptData);
+                localStorage.setItem('savedPrompts', JSON.stringify(savedPrompts));
+                showToast(`Prompt "${promptName}" saved successfully!`);
+            }
+        }
+
+        function loadPrompts() {
+            const savedPrompts = JSON.parse(localStorage.getItem('savedPrompts') || '[]');
+            
+            if (savedPrompts.length === 0) {
+                showToast('No saved prompts found.');
+                return;
+            }
+            
+            const promptList = savedPrompts.map((prompt, index) => 
+                `<div style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer;" 
+                      onclick="loadSavedPrompt(${index})">
+                    <strong>${prompt.name}</strong><br>
+                    <small style="color: var(--text-muted);">${new Date(prompt.timestamp).toLocaleDateString()}</small>
+                </div>`
+            ).join('');
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="section-title">📁 Saved Prompts</div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${promptList}
+                    </div>
+                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()" style="margin-top: 16px;">Close</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function loadSavedPrompt(index) {
+            const savedPrompts = JSON.parse(localStorage.getItem('savedPrompts') || '[]');
+            const prompt = savedPrompts[index];
+            
+            if (prompt) {
+                document.getElementById('mainInstruction').value = prompt.instruction;
+                document.getElementById('contextStyle').value = prompt.context || '';
+                document.getElementById('outputFormat').value = prompt.format || '';
+                document.getElementById('modelTarget').value = prompt.model || 'chatgpt';
+                variables = prompt.variables || [];
+                currentTemplate = prompt.template || 'creative';
+                
+                updateVariablesList();
+                updatePreview();
+                
+                document.querySelector('.modal')?.remove();
+                showToast(`Prompt "${prompt.name}" loaded successfully!`);
+            }
+        }
+
+        function exportPrompt() {
+            const promptData = {
+                template: currentTemplate,
+                instruction: document.getElementById('mainInstruction').value,
+                variables: variables,
+                context: document.getElementById('contextStyle').value,
+                format: document.getElementById('outputFormat').value,
+                model: document.getElementById('modelTarget').value,
+                exported: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(promptData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ai-prompt-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('Prompt exported successfully!');
+        }
+
+        function importPrompt() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const promptData = JSON.parse(e.target.result);
+                            
+                            document.getElementById('mainInstruction').value = promptData.instruction || '';
+                            document.getElementById('contextStyle').value = promptData.context || '';
+                            document.getElementById('outputFormat').value = promptData.format || '';
+                            document.getElementById('modelTarget').value = promptData.model || 'chatgpt';
+                            variables = promptData.variables || [];
+                            currentTemplate = promptData.template || 'creative';
+                            
+                            updateVariablesList();
+                            updatePreview();
+                            showToast('Prompt imported successfully!');
+                        } catch (error) {
+                            showToast('Error importing prompt file.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function quickSave() {
+            const quickSaves = JSON.parse(localStorage.getItem('quickSaves') || '[]');
+            const promptData = {
+                instruction: document.getElementById('mainInstruction').value,
+                variables: variables,
+                context: document.getElementById('contextStyle').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            quickSaves.unshift(promptData);
+            if (quickSaves.length > 10) quickSaves.pop(); // Keep only 10 quick saves
+            
+            localStorage.setItem('quickSaves', JSON.stringify(quickSaves));
+            showToast('Quick save completed!');
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.dataset.theme;
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            body.dataset.theme = newTheme;
+            localStorage.setItem('theme', newTheme);
+            
+            const themeButton = document.querySelector('.theme-toggle');
+            themeButton.textContent = newTheme === 'light' ? '🌙' : '☀️';
+            
+            showToast(`Switched to ${newTheme} theme`);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.dataset.theme = savedTheme;
+            document.querySelector('.theme-toggle').textContent = savedTheme === 'light' ? '🌙' : '☀️';
+            
+            // Template card clicks
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    loadTemplate(card.dataset.template);
+                });
+            });
+            
+            // Auto-save functionality
+            let autoSaveTimeout;
+            const autoSave = () => {
+                clearTimeout(autoSaveTimeout);
+                autoSaveTimeout = setTimeout(() => {
+                    const autoSaveData = {
+                        instruction: document.getElementById('mainInstruction').value,
+                        variables: variables,
+                        context: document.getElementById('contextStyle').value,
+                        format: document.getElementById('outputFormat').value,
+                        model: document.getElementById('modelTarget').value
+                    };
+                    localStorage.setItem('autoSave', JSON.stringify(autoSaveData));
+                }, 2000);
+            };
+            
+            document.getElementById('mainInstruction').addEventListener('input', autoSave);
+            document.getElementById('contextStyle').addEventListener('input', autoSave);
+            
+            // Load auto-save on startup
+            const autoSaveData = JSON.parse(localStorage.getItem('autoSave') || '{}');
+            if (autoSaveData.instruction) {
+                document.getElementById('mainInstruction').value = autoSaveData.instruction;
+                document.getElementById('contextStyle').value = autoSaveData.context || '';
+                document.getElementById('outputFormat').value = autoSaveData.format || '';
+                document.getElementById('modelTarget').value = autoSaveData.model || 'chatgpt';
+                if (autoSaveData.variables) {
+                    variables = autoSaveData.variables;
+                    updateVariablesList();
+                }
+                updatePreview();
+            }
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    switch (e.key) {
+                        case 's':
+                            e.preventDefault();
+                            savePrompt();
+                            break;
+                        case 'c':
+                            if (e.shiftKey) {
+                                e.preventDefault();
+                                copyPrompt();
+                            }
+                            break;
+                        case 'e':
+                            e.preventDefault();
+                            exportPrompt();
+                            break;
+                        case 'i':
+                            e.preventDefault();
+                            importPrompt();
+                            break;
+                    }
+                }
+                
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+            
+            // Click outside modal to close
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    closeModal();
+                }
+            });
+            
+            // Real-time character counter with color coding
+            const updateStatsWithColors = (text) => {
+                const charCount = text.length;
+                const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+                const tokenCount = Math.ceil(charCount / 4);
+                
+                document.getElementById('charCount').textContent = charCount.toLocaleString();
+                document.getElementById('wordCount').textContent = wordCount.toLocaleString();
+                document.getElementById('tokenCount').textContent = tokenCount.toLocaleString();
+                
+                // Color coding based on optimal ranges
+                const charElement = document.getElementById('charCount');
+                const tokenElement = document.getElementById('tokenCount');
+                
+                if (tokenCount > 2000) {
+                    tokenElement.style.color = 'var(--error)';
+                    charElement.style.color = 'var(--error)';
+                } else if (tokenCount > 1500) {
+                    tokenElement.style.color = 'var(--warning)';
+                    charElement.style.color = 'var(--warning)';
+                } else {
+                    tokenElement.style.color = 'var(--success)';
+                    charElement.style.color = 'var(--success)';
+                }
+            };
+            
+            // Enhanced preview update
+            const originalUpdatePreview = updatePreview;
+            updatePreview = function() {
+                originalUpdatePreview();
+                const prompt = document.getElementById('previewOutput').textContent;
+                updateStatsWithColors(prompt);
+            };
+        });
+
+        // Advanced features for enterprise-level functionality
+        function generatePromptVariations() {
+            const basePrompt = document.getElementById('previewOutput').textContent;
+            const variations = [
+                basePrompt.replace(/\./g, '. Additionally,'),
+                basePrompt + '\n\nPlease provide detailed explanations for your reasoning.',
+                basePrompt + '\n\nConsider multiple perspectives and provide a balanced view.',
+                basePrompt.replace(/create/gi, 'generate').replace(/write/gi, 'compose')
+            ];
+            
+            showVariationsModal(variations);
+        }
+
+        function showVariationsModal(variations) {
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 800px;">
+                    <div class="section-title">🔄 Prompt Variations</div>
+                    ${variations.map((variation, index) => `
+                        <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; margin: 12px 0;">
+                            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 8px;">
+                                <strong>Variation ${index + 1}</strong>
+                                <button class="btn btn-secondary" onclick="copyVariation('${variation.replace(/'/g, "\\'")}')">Copy</button>
+                            </div>
+                            <div style="font-family: monospace; font-size: 13px; line-height: 1.4;">${variation}</div>
+                        </div>
+                    `).join('')}
+                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()" style="margin-top: 16px;">Close</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function copyVariation(variation) {
+            navigator.clipboard.writeText(variation).then(() => {
+                showToast('Variation copied to clipboard!');
+            });
+        }
+
+        // Performance monitoring
+        let performanceMetrics = {
+            loadTime: 0,
+            updateCount: 0,
+            lastUpdate: Date.now()
+        };
+
+        function trackPerformance() {
+            performanceMetrics.updateCount++;
+            performanceMetrics.lastUpdate = Date.now();
+        }
+
+        // Initialize performance tracking
+        window.addEventListener('load', () => {
+            performanceMetrics.loadTime = Date.now();
+        });
+    </script>
+</body>
+</html>
