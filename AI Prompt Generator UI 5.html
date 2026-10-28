@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prompt Generator Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --error: #f56565;
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #a0aec0;
+            --border: #2d3748;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 20px 50px -10px rgba(0, 0, 0, 0.6);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            opacity: 0.3;
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.3; }
+            50% { transform: translateX(-50%) scale(1.1); opacity: 0.5; }
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: var(--bg-tertiary);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Consolas', monospace;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.5s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #38a169);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #dd6b20);
+            color: white;
+        }
+
+        .variables-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .variable-item {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .variable-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .variable-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .variable-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .delete-variable {
+            background: var(--error);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .delete-variable:hover {
+            background: #e53e3e;
+            transform: scale(1.05);
+        }
+
+        .preview-container {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            padding: 25px;
+            font-family: 'Consolas', monospace;
+            line-height: 1.6;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-container::before {
+            content: 'LIVE PREVIEW';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 10px;
+            color: var(--success);
+            font-weight: 600;
+            background: rgba(72, 187, 120, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .preview-text {
+            white-space: pre-wrap;
+            word-break: break-word;
+            animation: fadeIn 0.5s ease;
+            margin-top: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .variable-highlight {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 0 2px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(102, 126, 234, 0.5); }
+            to { box-shadow: 0 0 15px rgba(102, 126, 234, 0.8); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .template-card {
+            background: var(--bg-tertiary);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.8s ease;
+            opacity: 0;
+        }
+
+        .template-card:hover::before {
+            animation: shimmer 1.5s ease-in-out;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+        }
+
+        .template-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .template-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .template-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .template-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .template-tag {
+            background: rgba(102, 126, 234, 0.2);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-tertiary);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: var(--error);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .panel {
+                padding: 20px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header fade-in">
+            <h1>AI Prompt Generator Pro</h1>
+            <p>Create powerful, structured prompts for ChatGPT, Claude, and Midjourney</p>
+        </div>
+
+        <div class="stats-grid fade-in">
+            <div class="stat-card">
+                <span class="stat-number" id="charCount">0</span>
+                <span class="stat-label">Characters</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="wordCount">0</span>
+                <span class="stat-label">Words</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="variableCount">0</span>
+                <span class="stat-label">Variables</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="templateCount">8</span>
+                <span class="stat-label">Templates</span>
+            </div>
+        </div>
+
+        <div class="template-grid fade-in">
+            <div class="template-card" data-template="creative-writing">
+                <div class="template-title">Creative Writing</div>
+                <div class="template-description">Generate compelling stories, poems, and creative content with customizable parameters</div>
+                <div class="template-tags">
+                    <span class="template-tag">Story</span>
+                    <span class="template-tag">Poetry</span>
+                    <span class="template-tag">Fiction</span>
+                </div>
+            </div>
+            <div class="template-card" data-template="code-generation">
+                <div class="template-title">Code Generation</div>
+                <div class="template-description">Create structured prompts for programming tasks, debugging, and code optimization</div>
+                <div class="template-tags">
+                    <span class="template-tag">Programming</span>
+                    <span class="template-tag">Debug</span>
+                    <span class="template-tag">API</span>
+                </div>
+            </div>
+            <div class="template-card" data-template="business-analysis">
+                <div class="template-title">Business Analysis</div>
+                <div class="template-description">Analyze markets, create business plans, and generate strategic insights</div>
+                <div class="template-tags">
+                    <span class="template-tag">Strategy</span>
+                    <span class="template-tag">Analysis</span>
+                    <span class="template-tag">Planning</span>
+                </div>
+            </div>
+            <div class="template-card" data-template="midjourney">
+                <div class="template-title">Midjourney Art</div>
+                <div class="template-description">Create detailed image generation prompts with style, composition, and technical parameters</div>
+                <div class="template-tags">
+                    <span class="template-tag">Art</span>
+                    <span class="template-tag">Visual</span>
+                    <span class="template-tag">Creative</span>
+                </div>
+            </div>
+            <div class="template-card" data-template="education">
+                <div class="template-title">Educational Content</div>
+                <div class="template-description">Design learning materials, explanations, and educational assessments</div>
+                <div class="template-tags">
+                    <span class="template-tag">Teaching</span>
+                    <span class="template-tag">Learning</span>
+                    <span class="template-tag">Assessment</span>
+                </div>
+            </div>
+            <div class="template-card" data-template="marketing">
+                <div class="template-title">Marketing Copy</div>
+                <div class="template-description">Generate compelling marketing content, ads, and promotional materials</div>
+                <div class="template-tags">
+                    <span class="template-tag">Advertising</span>
+                    <span class="template-tag">Copy</span>
+                    <span class="template-tag">Promotion</span>
+                </div>
+            </div>
+            <div class="template-card" data-template="research">
+                <div class="template-title">Research Assistant</div>
+                <div class="template-description">Structure research queries, analysis requests, and data interpretation tasks</div>
+                <div class="template-tags">
+                    <span class="template-tag">Research</span>
+                    <span class="template-tag">Data</span>
+                    <span class="template-tag">Analysis</span>
+                </div>
+            </div>
+            <div class="template-card" data-template="custom">
+                <div class="template-title">Custom Template</div>
+                <div class="template-description">Start from scratch and build your own personalized prompt template</div>
+                <div class="template-tags">
+                    <span class="template-tag">Custom</span>
+                    <span class="template-tag">Flexible</span>
+                    <span class="template-tag">Personal</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid fade-in">
+            <div class="panel">
+                <h2 class="panel-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    Prompt Builder
+                </h2>
+
+                <div class="form-group">
+                    <label class="form-label">AI Platform</label>
+                    <select id="aiPlatform" class="form-control">
+                        <option value="chatgpt">ChatGPT / OpenAI</option>
+                        <option value="claude">Claude (Anthropic)</option>
+                        <option value="midjourney">Midjourney</option>
+                        <option value="general">General Purpose</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Prompt Category</label>
+                    <select id="promptCategory" class="form-control">
+                        <option value="">Select Category</option>
+                        <option value="creative">Creative Writing</option>
+                        <option value="technical">Technical/Code</option>
+                        <option value="business">Business/Marketing</option>
+                        <option value="education">Educational</option>
+                        <option value="research">Research/Analysis</option>
+                        <option value="personal">Personal Assistant</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Base Prompt Template</label>
+                    <textarea id="promptTemplate" class="form-control" rows="6" placeholder="Write your prompt template here. Use {variableName} for dynamic content.
+
+Example:
+Act as a {role} and help me {task}. 
+Focus on {focus_area} and provide {output_type}.
+Make sure to consider {constraints} in your response."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Add Variable</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="variableName" class="form-control" placeholder="Variable name (e.g., 'role')" style="flex: 1;">
+                        <select id="variableType" class="form-control" style="flex: 1;">
+                            <option value="text">Text</option>
+                            <option value="number">Number</option>
+                            <option value="select">Dropdown</option>
+                            <option value="textarea">Long Text</option>
+                        </select>
+                        <button type="button" class="btn btn-primary" onclick="addVariable()">Add</button>
+                    </div>
+                </div>
+
+                <div class="variables-container" id="variablesContainer"></div>
+
+                <div class="actions-bar">
+                    <button class="btn btn-primary" onclick="generatePrompt()">
+                        <span class="loading" id="generateLoading" style="display: none;"></span>
+                        Generate Preview
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+                    <button class="btn btn-success" onclick="exportPrompt()">Export JSON</button>
+                    <button class="btn btn-warning" onclick="importPrompt()">Import</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10,9 9,9 8,9"/>
+                    </svg>
+                    Live Preview
+                </h2>
+
+                <div class="preview-container">
+                    <div class="preview-text" id="previewText">Your generated prompt will appear here in real-time as you build it...</div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="copyToClipboard()">
+                        📋 Copy Prompt
+                    </button>
+                    <button class="btn btn-secondary" onclick="savePrompt()">
+                        💾 Save Template
+                    </button>
+                    <button class="btn btn-warning" onclick="sharePrompt()">
+                        🔗 Share Link
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Import -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Import Prompt Template</h3>
+                <button class="close" onclick="closeImportModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Paste JSON or Template</label>
+                <textarea id="importData" class="form-control" rows="10" placeholder='Paste your exported JSON or template text here...'></textarea>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="processImport()">Import</button>
+                <button class="btn btn-secondary" onclick="closeImportModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let variables = {};
+        let promptHistory = [];
+        
+        const templates = {
+            'creative-writing': {
+                template: `Act as a creative {writer_type} and help me write a {content_type} about {topic}.
+
+Style: {writing_style}
+Target audience: {audience}
+Length: {length}
+Tone: {tone}
+
+Additional requirements:
+- {requirement1}
+- {requirement2}
+- {requirement3}
+
+Please provide a {output_format} that captures the essence of {theme} while maintaining {quality_focus}.`,
+                variables: {
+                    writer_type: { type: 'select', options: ['novelist', 'poet', 'screenwriter', 'journalist', 'blogger'], value: 'novelist' },
+                    content_type: { type: 'select', options: ['short story', 'poem', 'script', 'article', 'blog post'], value: 'short story' },
+                    topic: { type: 'text', value: 'space exploration' },
+                    writing_style: { type: 'select', options: ['descriptive', 'minimalist', 'lyrical', 'journalistic', 'conversational'], value: 'descriptive' },
+                    audience: { type: 'text', value: 'young adults' },
+                    length: { type: 'select', options: ['500 words', '1000 words', '2000 words', '5000 words'], value: '1000 words' },
+                    tone: { type: 'select', options: ['inspiring', 'mysterious', 'humorous', 'dramatic', 'contemplative'], value: 'inspiring' },
+                    requirement1: { type: 'text', value: 'Include vivid imagery' },
+                    requirement2: { type: 'text', value: 'Focus on character development' },
+                    requirement3: { type: 'text', value: 'Create emotional resonance' },
+                    output_format: { type: 'select', options: ['complete story', 'detailed outline', 'first draft', 'story structure'], value: 'complete story' },
+                    theme: { type: 'text', value: 'human perseverance' },
+                    quality_focus: { type: 'select', options: ['originality', 'emotional impact', 'literary merit', 'entertainment value'], value: 'emotional impact' }
+                }
+            },
+            'code-generation': {
+                template: `Act as a senior {developer_role} and help me {task_type} using {programming_language}.
+
+Project context: {project_context}
+Requirements:
+- {requirement1}
+- {requirement2}
+- {requirement3}
+
+Technical specifications:
+- Framework/Library: {framework}
+- Performance target: {performance}
+- Code style: {code_style}
+- Testing approach: {testing}
+
+Please provide {output_type} with:
+1. Clean, well-commented code
+2. Error handling
+3. Best practices implementation
+4. {additional_request}`,
+                variables: {
+                    developer_role: { type: 'select', options: ['full-stack developer', 'backend developer', 'frontend developer', 'DevOps engineer', 'data scientist'], value: 'full-stack developer' },
+                    task_type: { type: 'select', options: ['build a new feature', 'debug existing code', 'optimize performance', 'refactor legacy code', 'create API endpoints'], value: 'build a new feature' },
+                    programming_language: { type: 'select', options: ['JavaScript', 'Python', 'Java', 'C#', 'Go', 'Rust', 'TypeScript'], value: 'JavaScript' },
+                    project_context: { type: 'text', value: 'e-commerce web application' },
+                    requirement1: { type: 'text', value: 'Scalable architecture' },
+                    requirement2: { type: 'text', value: 'Security best practices' },
+                    requirement3: { type: 'text', value: 'Mobile-responsive design' },
+                    framework: { type: 'text', value: 'React/Node.js' },
+                    performance: { type: 'select', options: ['High performance', 'Standard performance', 'Memory optimized', 'Speed optimized'], value: 'High performance' },
+                    code_style: { type: 'select', options: ['Clean Code', 'Functional', 'OOP', 'Modular'], value: 'Clean Code' },
+                    testing: { type: 'select', options: ['Unit tests', 'Integration tests', 'E2E tests', 'All testing types'], value: 'Unit tests' },
+                    output_type: { type: 'select', options: ['complete implementation', 'code snippets', 'architecture design', 'step-by-step guide'], value: 'complete implementation' },
+                    additional_request: { type: 'text', value: 'Documentation and usage examples' }
+                }
+            },
+            'business-analysis': {
+                template: `Act as a senior {analyst_role} and provide a comprehensive analysis of {business_topic}.
+
+Industry: {industry}
+Company size: {company_size}
+Market focus: {market_focus}
+Timeline: {timeline}
+
+Analysis requirements:
+- {analysis_type1}
+- {analysis_type2}
+- {analysis_type3}
+
+Key metrics to evaluate:
+- {metric1}
+- {metric2}
+- {metric3}
+
+Deliverables needed:
+1. {deliverable1}
+2. {deliverable2}
+3. {deliverable3}
+
+Please structure your response with {format_style} and include {additional_insights}.`,
+                variables: {
+                    analyst_role: { type: 'select', options: ['business analyst', 'market researcher', 'strategic consultant', 'financial analyst', 'operations analyst'], value: 'business analyst' },
+                    business_topic: { type: 'text', value: 'market expansion strategy' },
+                    industry: { type: 'select', options: ['Technology', 'Healthcare', 'Finance', 'Retail', 'Manufacturing', 'Education'], value: 'Technology' },
+                    company_size: { type: 'select', options: ['Startup', 'SMB', 'Enterprise', 'Fortune 500'], value: 'SMB' },
+                    market_focus: { type: 'select', options: ['B2B', 'B2C', 'B2B2C', 'Government'], value: 'B2B' },
+                    timeline: { type: 'select', options: ['1 month', '3 months', '6 months', '1 year'], value: '3 months' },
+                    analysis_type1: { type: 'text', value: 'Competitive landscape analysis' },
+                    analysis_type2: { type: 'text', value: 'Market opportunity assessment' },
+                    analysis_type3: { type: 'text', value: 'Risk and mitigation strategies' },
+                    metric1: { type: 'text', value: 'Market share potential' },
+                    metric2: { type: 'text', value: 'Revenue projections' },
+                    metric3: { type: 'text', value: 'Customer acquisition cost' },
+                    deliverable1: { type: 'text', value: 'Executive summary' },
+                    deliverable2: { type: 'text', value: 'Detailed analysis report' },
+                    deliverable3: { type: 'text', value: 'Action plan with timeline' },
+                    format_style: { type: 'select', options: ['executive summary format', 'detailed report format', 'presentation slides', 'infographic style'], value: 'executive summary format' },
+                    additional_insights: { type: 'text', value: 'industry trends and recommendations' }
+                }
+            },
+            'midjourney': {
+                template: `/imagine prompt: {subject} {action}, {style_description}
+
+Art style: {art_style}
+Camera: {camera_angle}, {shot_type}
+Lighting: {lighting_type}
+Colors: {color_palette}
+Mood: {mood_atmosphere}
+
+Technical parameters: {aspect_ratio}, {quality_level}, {stylize_level}
+
+Additional details: {detail1}, {detail2}, {detail3} --v {version} --ar {aspect_ratio} --q {quality_level} --s {stylize_level}`,
+                variables: {
+                    subject: { type: 'text', value: 'a futuristic city' },
+                    action: { type: 'text', value: 'at sunset with flying cars' },
+                    style_description: { type: 'text', value: 'cyberpunk aesthetic with neon lights' },
+                    art_style: { type: 'select', options: ['photorealistic', 'digital art', 'oil painting', 'watercolor', 'pencil sketch', 'anime', 'concept art'], value: 'digital art' },
+                    camera_angle: { type: 'select', options: ['wide angle', 'close-up', 'aerial view', 'low angle', 'high angle', 'eye level'], value: 'wide angle' },
+                    shot_type: { type: 'select', options: ['establishing shot', 'medium shot', 'close-up', 'extreme close-up', 'full body'], value: 'establishing shot' },
+                    lighting_type: { type: 'select', options: ['golden hour', 'dramatic lighting', 'soft lighting', 'neon lighting', 'natural light', 'studio lighting'], value: 'dramatic lighting' },
+                    color_palette: { type: 'select', options: ['vibrant colors', 'muted tones', 'monochromatic', 'complementary colors', 'neon colors', 'earth tones'], value: 'vibrant colors' },
+                    mood_atmosphere: { type: 'select', options: ['mysterious', 'energetic', 'serene', 'dramatic', 'futuristic', 'nostalgic'], value: 'futuristic' },
+                    detail1: { type: 'text', value: 'intricate architectural details' },
+                    detail2: { type: 'text', value: 'volumetric fog' },
+                    detail3: { type: 'text', value: '8k resolution' },
+                    version: { type: 'select', options: ['6', '5.2', '5.1', '5'], value: '6' },
+                    aspect_ratio: { type: 'select', options: ['16:9', '4:3', '1:1', '3:2', '9:16'], value: '16:9' },
+                    quality_level: { type: 'select', options: ['2', '1', '0.5'], value: '2' },
+                    stylize_level: { type: 'select', options: ['1000', '750', '500', '250', '100'], value: '500' }
+                }
+            },
+            'education': {
+                template: `Act as an expert {educator_role} and help me create educational content for {subject_area}.
+
+Target audience: {audience_level}
+Learning objectives:
+- {objective1}
+- {objective2}
+- {objective3}
+
+Content format: {content_format}
+Duration/Length: {duration}
+Difficulty level: {difficulty}
+
+Teaching methods to incorporate:
+- {method1}
+- {method2}
+- {method3}
+
+Assessment type: {assessment_type}
+
+Please create {deliverable} that includes {special_requirements} and follows {pedagogical_approach} principles.`,
+                variables: {
+                    educator_role: { type: 'select', options: ['curriculum designer', 'instructional designer', 'subject matter expert', 'educational consultant'], value: 'instructional designer' },
+                    subject_area: { type: 'text', value: 'data science fundamentals' },
+                    audience_level: { type: 'select', options: ['elementary school', 'middle school', 'high school', 'college', 'adult learners', 'professionals'], value: 'college' },
+                    objective1: { type: 'text', value: 'Understand core concepts' },
+                    objective2: { type: 'text', value: 'Apply knowledge practically' },
+                    objective3: { type: 'text', value: 'Develop critical thinking' },
+                    content_format: { type: 'select', options: ['lesson plan', 'online course', 'workshop', 'tutorial series', 'interactive module'], value: 'online course' },
+                    duration: { type: 'select', options: ['30 minutes', '1 hour', '2 hours', '1 day', '1 week', '1 month'], value: '1 week' },
+                    difficulty: { type: 'select', options: ['beginner', 'intermediate', 'advanced', 'expert'], value: 'intermediate' },
+                    method1: { type: 'text', value: 'Interactive demonstrations' },
+                    method2: { type: 'text', value: 'Hands-on exercises' },
+                    method3: { type: 'text', value: 'Peer collaboration' },
+                    assessment_type: { type: 'select', options: ['quiz', 'project', 'presentation', 'portfolio', 'peer review'], value: 'project' },
+                    deliverable: { type: 'select', options: ['complete lesson plan', 'course outline', 'learning materials', 'assessment rubric'], value: 'complete lesson plan' },
+                    special_requirements: { type: 'text', value: 'multimedia elements and real-world examples' },
+                    pedagogical_approach: { type: 'select', options: ['constructivist', 'experiential learning', 'problem-based learning', 'collaborative learning'], value: 'experiential learning' }
+                }
+            },
+            'marketing': {
+                template: `Act as a senior {marketing_role} and create compelling marketing content for {product_service}.
+
+Brand: {brand_name}
+Target audience: {target_audience}
+Marketing goal: {marketing_goal}
+Campaign type: {campaign_type}
+Budget range: {budget_range}
+
+Key messaging:
+- {message1}
+- {message2}
+- {message3}
+
+Channels: {channels}
+Tone of voice: {tone_voice}
+Call-to-action: {cta}
+
+Deliverables needed:
+1. {deliverable1}
+2. {deliverable2}
+3. {deliverable3}
+
+Please ensure the content is {content_style} and includes {special_elements}.`,
+                variables: {
+                    marketing_role: { type: 'select', options: ['copywriter', 'content strategist', 'brand manager', 'digital marketer', 'creative director'], value: 'copywriter' },
+                    product_service: { type: 'text', value: 'SaaS productivity tool' },
+                    brand_name: { type: 'text', value: 'ProductivePro' },
+                    target_audience: { type: 'text', value: 'small business owners aged 25-45' },
+                    marketing_goal: { type: 'select', options: ['brand awareness', 'lead generation', 'conversion', 'customer retention', 'market penetration'], value: 'lead generation' },
+                    campaign_type: { type: 'select', options: ['product launch', 'seasonal campaign', 'brand awareness', 'promotional campaign', 'thought leadership'], value: 'product launch' },
+                    budget_range: { type: 'select', options: ['$1K-5K', '$5K-15K', '$15K-50K', '$50K+'], value: '$5K-15K' },
+                    message1: { type: 'text', value: 'Save 3 hours daily with automation' },
+                    message2: { type: 'text', value: 'Simple setup, powerful results' },
+                    message3: { type: 'text', value: 'Trusted by 10,000+ businesses' },
+                    channels: { type: 'select', options: ['social media', 'email marketing', 'content marketing', 'paid advertising', 'multi-channel'], value: 'multi-channel' },
+                    tone_voice: { type: 'select', options: ['professional', 'friendly', 'authoritative', 'conversational', 'inspiring'], value: 'friendly' },
+                    cta: { type: 'text', value: 'Start your free 14-day trial' },
+                    deliverable1: { type: 'text', value: 'Landing page copy' },
+                    deliverable2: { type: 'text', value: 'Email sequence' },
+                    deliverable3: { type: 'text', value: 'Social media posts' },
+                    content_style: { type: 'select', options: ['benefit-focused', 'story-driven', 'data-driven', 'emotion-focused'], value: 'benefit-focused' },
+                    special_elements: { type: 'text', value: 'customer testimonials and social proof' }
+                }
+            },
+            'research': {
+                template: `Act as a research {researcher_role} and conduct a thorough investigation of {research_topic}.
+
+Research scope: {research_scope}
+Methodology: {methodology}
+Data sources: {data_sources}
+Timeline: {timeline}
+
+Research questions:
+- {question1}
+- {question2}
+- {question3}
+
+Analysis approach:
+- {analysis1}
+- {analysis2}
+- {analysis3}
+
+Expected outcomes:
+1. {outcome1}
+2. {outcome2}
+3. {outcome3}
+
+Please provide {output_format} with {depth_level} analysis and include {additional_requirements}.`,
+                variables: {
+                    researcher_role: { type: 'select', options: ['academic researcher', 'market researcher', 'data analyst', 'policy researcher', 'user researcher'], value: 'academic researcher' },
+                    research_topic: { type: 'text', value: 'impact of remote work on productivity' },
+                    research_scope: { type: 'select', options: ['exploratory', 'descriptive', 'explanatory', 'correlational', 'experimental'], value: 'exploratory' },
+                    methodology: { type: 'select', options: ['qualitative', 'quantitative', 'mixed methods', 'systematic review', 'meta-analysis'], value: 'mixed methods' },
+                    data_sources: { type: 'text', value: 'surveys, interviews, and performance metrics' },
+                    timeline: { type: 'select', options: ['2 weeks', '1 month', '3 months', '6 months', '1 year'], value: '3 months' },
+                    question1: { type: 'text', value: 'How has remote work affected employee productivity?' },
+                    question2: { type: 'text', value: 'What factors contribute to successful remote work?' },
+                    question3: { type: 'text', value: 'What are the long-term implications?' },
+                    analysis1: { type: 'text', value: 'Statistical analysis of productivity metrics' },
+                    analysis2: { type: 'text', value: 'Thematic analysis of interview data' },
+                    analysis3: { type: 'text', value: 'Comparative analysis across industries' },
+                    outcome1: { type: 'text', value: 'Comprehensive research report' },
+                    outcome2: { type: 'text', value: 'Policy recommendations' },
+                    outcome3: { type: 'text', value: 'Implementation guidelines' },
+                    output_format: { type: 'select', options: ['detailed report', 'executive summary', 'research paper', 'presentation'], value: 'detailed report' },
+                    depth_level: { type: 'select', options: ['high-level overview', 'detailed analysis', 'comprehensive study', 'in-depth investigation'], value: 'detailed analysis' },
+                    additional_requirements: { type: 'text', value: 'peer-reviewed sources and statistical validation' }
+                }
+            },
+            'custom': {
+                template: `Act as a {role} and help me with {task}.
+
+Context: {context}
+
+Requirements:
+- {requirement1}
+- {requirement2}
+- {requirement3}
+
+Please provide {output} that {criteria}.`,
+                variables: {
+                    role: { type: 'text', value: 'expert assistant' },
+                    task: { type: 'text', value: 'solve my problem' },
+                    context: { type: 'textarea', value: 'Provide context here...' },
+                    requirement1: { type: 'text', value: 'First requirement' },
+                    requirement2: { type: 'text', value: 'Second requirement' },
+                    requirement3: { type: 'text', value: 'Third requirement' },
+                    output: { type: 'text', value: 'a detailed response' },
+                    criteria: { type: 'text', value: 'meets all specified requirements' }
+                }
+            }
+        };
+
+        function loadTemplate(templateName) {
+            if (!templates[templateName]) return;
+            
+            const template = templates[templateName];
+            document.getElementById('promptTemplate').value = template.template;
+            
+            // Clear existing variables
+            variables = {};
+            document.getElementById('variablesContainer').innerHTML = '';
+            
+            // Load template variables
+            Object.entries(template.variables).forEach(([name, config]) => {
+                variables[name] = config;
+                addVariableToDOM(name, config);
+            });
+            
+            updateStats();
+            generatePrompt();
+        }
+
+        function addVariableToDOM(name, config) {
+            const container = document.getElementById('variablesContainer');
+            const variableDiv = document.createElement('div');
+            variableDiv.className = 'variable-item';
+            variableDiv.dataset.variable = name;
+            
+            let inputHTML = '';
+            switch(config.type) {
+                case 'text':
+                    inputHTML = `<input type="text" class="form-control" value="${config.value || ''}" onchange="updateVariable('${name}', this.value)">`;
+                    break;
+                case 'number':
+                    inputHTML = `<input type="number" class="form-control" value="${config.value || ''}" onchange="updateVariable('${name}', this.value)">`;
+                    break;
+                case 'textarea':
+                    inputHTML = `<textarea class="form-control" rows="3" onchange="updateVariable('${name}', this.value)">${config.value || ''}</textarea>`;
+                    break;
+                case 'select':
+                    const options = config.options || [];
+                    inputHTML = `<select class="form-control" onchange="updateVariable('${name}', this.value)">
+                        ${options.map(option => `<option value="${option}" ${option === config.value ? 'selected' : ''}>${option}</option>`).join('')}
+                    </select>`;
+                    break;
+            }
+            
+            variableDiv.innerHTML = `
+                <div class="variable-header">
+                    <span class="variable-name">{${name}}</span>
+                    <button class="delete-variable" onclick="removeVariable('${name}')">Delete</button>
+                </div>
+                ${inputHTML}
+            `;
+            
+            container.appendChild(variableDiv);
+        }
+
+        function addVariable() {
+            const nameInput = document.getElementById('variableName');
+            const typeSelect = document.getElementById('variableType');
+            
+            const name = nameInput.value.trim();
+            const type = typeSelect.value;
+            
+            if (!name || variables[name]) {
+                alert(variables[name] ? 'Variable already exists!' : 'Please enter a variable name!');
+                return;
+            }
+            
+            const config = { type, value: '', options: [] };
+            if (type === 'select') {
+                const optionsStr = prompt('Enter options separated by commas:', 'option1, option2, option3');
+                if (optionsStr) {
+                    config.options = optionsStr.split(',').map(s => s.trim()).filter(s => s);
+                    config.value = config.options[0] || '';
+                }
+            }
+            
+            variables[name] = config;
+            addVariableToDOM(name, config);
+            
+            nameInput.value = '';
+            updateStats();
+            generatePrompt();
+        }
+
+        function removeVariable(name) {
+            delete variables[name];
+            const element = document.querySelector(`[data-variable="${name}"]`);
+            if (element) element.remove();
+            updateStats();
+            generatePrompt();
+        }
+
+        function updateVariable(name, value) {
+            if (variables[name]) {
+                variables[name].value = value;
+                generatePrompt();
+            }
+        }
+
+        function generatePrompt() {
+            const loading = document.getElementById('generateLoading');
+            loading.style.display = 'inline-block';
+            
+            setTimeout(() => {
+                const template = document.getElementById('promptTemplate').value;
+                let generatedPrompt = template;
+                
+                // Replace variables in template
+                Object.entries(variables).forEach(([name, config]) => {
+                    const regex = new RegExp(`\\{${name}\\}`, 'g');
+                    const value = config.value || `[${name}]`;
+                    generatedPrompt = generatedPrompt.replace(regex, `<span class="variable-highlight">${value}</span>`);
+                });
+                
+                // Handle unreplaced variables
+                generatedPrompt = generatedPrompt.replace(/\{([^}]+)\}/g, '<span class="variable-highlight">[$1]</span>');
+                
+                document.getElementById('previewText').innerHTML = generatedPrompt || 'Your generated prompt will appear here...';
+                loading.style.display = 'none';
+                updateStats();
+            }, 500);
+        }
+
+        function updateStats() {
+            const template = document.getElementById('promptTemplate').value;
+            const plainText = template.replace(/<[^>]*>/g, '');
+            
+            document.getElementById('charCount').textContent = plainText.length;
+            document.getElementById('wordCount').textContent = plainText.trim() ? plainText.trim().split(/\s+/).length : 0;
+            document.getElementById('variableCount').textContent = Object.keys(variables).length;
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to clear everything?')) {
+                document.getElementById('promptTemplate').value = '';
+                variables = {};
+                document.getElementById('variablesContainer').innerHTML = '';
+                document.getElementById('previewText').innerHTML = 'Your generated prompt will appear here...';
+                updateStats();
+            }
+        }
+
+        function copyToClipboard() {
+            const previewElement = document.getElementById('previewText');
+            const plainText = previewElement.innerText || previewElement.textContent;
+            
+            navigator.clipboard.writeText(plainText).then(() => {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '✅ Copied!';
+                button.style.background = 'var(--success)';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }).catch(() => {
+                alert('Failed to copy to clipboard');
+            });
+        }
+
+        function savePrompt() {
+            const template = document.getElementById('promptTemplate').value;
+            if (!template.trim()) {
+                alert('Please create a prompt first!');
+                return;
+            }
+            
+            const name = prompt('Enter a name for this template:');
+            if (!name) return;
+            
+            const savedPrompts = JSON.parse(localStorage.getItem('savedPrompts') || '{}');
+            savedPrompts[name] = {
+                template,
+                variables: { ...variables },
+                created: new Date().toISOString()
+            };
+            
+            try {
+                localStorage.setItem('savedPrompts', JSON.stringify(savedPrompts));
+                alert('Template saved successfully!');
+            } catch (error) {
+                alert('Failed to save template. Storage might be full.');
+            }
+        }
+
+        function exportPrompt() {
+            const data = {
+                template: document.getElementById('promptTemplate').value,
+                variables: variables,
+                platform: document.getElementById('aiPlatform').value,
+                category: document.getElementById('promptCategory').value,
+                exported: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'prompt-template.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importPrompt() {
+            document.getElementById('importModal').style.display = 'block';
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').style.display = 'none';
+        }
+
+        function processImport() {
+            const importData = document.getElementById('importData').value;
+            if (!importData.trim()) {
+                alert('Please paste some data to import!');
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(importData);
+                
+                if (data.template) {
+                    document.getElementById('promptTemplate').value = data.template;
+                }
+                
+                if (data.variables) {
+                    variables = { ...data.variables };
+                    document.getElementById('variablesContainer').innerHTML = '';
+                    Object.entries(variables).forEach(([name, config]) => {
+                        addVariableToDOM(name, config);
+                    });
+                }
+                
+                if (data.platform) {
+                    document.getElementById('aiPlatform').value = data.platform;
+                }
+                
+                if (data.category) {
+                    document.getElementById('promptCategory').value = data.category;
+                }
+                
+                generatePrompt();
+                closeImportModal();
+                alert('Import successful!');
+                
+            } catch (error) {
+                alert('Invalid JSON format. Please check your data.');
+            }
+        }
+
+        function sharePrompt() {
+            const data = {
+                template: document.getElementById('promptTemplate').value,
+                variables: variables
+            };
+            
+            const encoded = btoa(JSON.stringify(data));
+            const url = `${window.location.origin}${window.location.pathname}?shared=${encoded}`;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Share link copied to clipboard!');
+            }).catch(() => {
+                prompt('Copy this share link:', url);
+            });
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load shared prompt if exists
+            const urlParams = new URLSearchParams(window.location.search);
+            const shared = urlParams.get('shared');
+            if (shared) {
+                try {
+                    const data = JSON.parse(atob(shared));
+                    document.getElementById('promptTemplate').value = data.template || '';
+                    variables = data.variables || {};
+                    Object.entries(variables).forEach(([name, config]) => {
+                        addVariableToDOM(name, config);
+                    });
+                    generatePrompt();
+                } catch (error) {
+                    console.error('Failed to load shared prompt:', error);
+                }
+            }
+            
+            // Template selection
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const template = this.dataset.template;
+                    loadTemplate(template);
+                    
+                    // Visual feedback
+                    document.querySelectorAll('.template-card').forEach(c => c.style.borderColor = 'var(--border)');
+                    this.style.borderColor = 'var(--primary)';
+                });
+            });
+            
+            // Auto-update preview
+            document.getElementById('promptTemplate').addEventListener('input', generatePrompt);
+            
+            // Platform change
+            document.getElementById('aiPlatform').addEventListener('change', function() {
+                const platform = this.value;
+                // You could add platform-specific optimizations here
+                generatePrompt();
+            });
+            
+            // Initialize stats
+            updateStats();
+            
+            // Add fade-in animation to elements
+            setTimeout(() => {
+                document.querySelectorAll('.fade-in').forEach((el, index) => {
+                    setTimeout(() => {
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    }, index * 100);
+                });
+            }, 100);
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('importModal');
+            if (event.target === modal) {
+                closeImportModal();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case 's':
+                        event.preventDefault();
+                        savePrompt();
+                        break;
+                    case 'e':
+                        event.preventDefault();
+                        exportPrompt();
+                        break;
+                    case 'i':
+                        event.preventDefault();
+                        importPrompt();
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
